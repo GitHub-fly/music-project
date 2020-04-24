@@ -23,7 +23,22 @@ const routes = [
         component: () => import('../views/About.vue')
       },
       {
-        path: '/music-list',
+        path: '/song',
+        name: 'Song',
+        component: () => import('../views/Song.vue')
+      },
+      {
+        path: '/permission',
+        name: 'Permission',
+        component: () => import('../views/Permission.vue')
+      },
+      {
+        path: '/type',
+        name: 'Type',
+        component: () => import('../views/Type.vue')
+      },
+      {
+        path: '/list',
         name: 'MusicList',
         component: () => import('../views/MusicList.vue')
       },

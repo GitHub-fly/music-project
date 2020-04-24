@@ -40,35 +40,31 @@
                 :expand-on-hover="expandOnHover"
                 :mini-variant="miniVariant"
                 :right="right"
-                :src="bg"
                 absolute
                 dark
               >
                 <v-list dense nav class="py-0">
                   <v-list-item two-line :class="miniVariant && 'px-0'">
                     <v-list-item-avatar>
-                      <img
-                        @click="miniVariant = !miniVariant"
-                        src="https://avatars1.githubusercontent.com/u/42235689?s=60&u=b25100f60b66465b78fe97e36b2788715c216a6d&v=4"
-                      />
+                      <img @click="miniVariant = !miniVariant" :src="user.avatar" style="cursor: pointer" />
                     </v-list-item-avatar>
 
                     <v-list-item-content>
                       <v-list-item-title><h3 class="gutter">Cloud Music</h3> </v-list-item-title>
-                      <v-list-item-subtitle class="gutter">Super Admin</v-list-item-subtitle>
+                      <v-list-item-subtitle class="gutter">{{ roleName }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
 
                   <v-divider></v-divider>
 
                   <v-list-item v-for="item in items" :key="item.title" link>
-                    <template v-if="item.subMenus.length === 0">
+                    <template v-if="item.subMenus === null">
                       <v-list-item-icon>
                         <v-icon>{{ item.icon }}</v-icon>
                       </v-list-item-icon>
 
-                      <v-list-item-content>
-                        <router-link :to="item.url">
+                      <v-list-item-content v-if="item.path !== null">
+                        <router-link :to="item.path">
                           <v-list-item-title class="gutter">{{ item.title }}</v-list-item-title>
                         </router-link>
                       </v-list-item-content>
@@ -81,12 +77,12 @@
                           </v-list-item-icon>
                           <v-list-item-title>{{ item.title }}</v-list-item-title>
                         </template>
-                        <v-list-item-content style="margin-left:20px;">
+                        <v-list-item-content style="margin-left:20px; ">
                           <v-list-item v-for="(menu, i) in item.subMenus" :key="i" link>
                             <v-list-item-icon class="gutter">
                               <v-icon :v-text="menu.icon">{{ menu.icon }}</v-icon>
                             </v-list-item-icon>
-                            <router-link :to="menu.url">
+                            <router-link :to="menu.path">
                               <v-list-item-title :v-text="menu.title" class="gutter">{{ menu.title }}</v-list-item-title>
                             </router-link>
                           </v-list-item>
@@ -112,10 +108,11 @@ export default {
   name: 'Layout',
   data() {
     return {
-      user: this.$store.state.user,
+      user: JSON.parse(localStorage.getItem('user')),
       drawer: true,
-      items: this.$store.state.menuList1,
-      color: 'primary',
+      items: JSON.parse(localStorage.getItem('menuList')),
+      roleName: localStorage.getItem('roleName'),
+      color: 'gary',
       colors: ['primary', 'blue', 'success', 'red', 'teal'],
       right: true,
       miniVariant: false,
@@ -129,7 +126,7 @@ export default {
   methods: {
     logout() {
       alert('logout')
-      localStorage.removeItem('token')
+      localStorage.clear()
       this.$store.commit('setUser', null)
       this.$router.push('/login')
     }

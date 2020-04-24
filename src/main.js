@@ -4,9 +4,16 @@ import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
 import MuseUI from 'muse-ui'
+import global_ from './util/Global.vue'
+//引入axios
+import axios from 'axios'
 import 'muse-ui/dist/muse-ui.css'
 
+Vue.prototype.axios = axios
+Vue.prototype.GLOBAL = global_
+
 Vue.use(MuseUI)
+
 Vue.config.productionTip = false
 
 // 导航钩子，全局钩子
