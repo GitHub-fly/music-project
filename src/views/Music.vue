@@ -1,19 +1,37 @@
 <template>
   <div style="padding-top:10px;">
-    <h1>音乐管理</h1>
-    <!-- <span v-for="(item, index) in permissions" :key="index" class="gutter">
-      <mu-button color="teal" v-if="item === 'music:add'">添加歌曲</mu-button>
-      <mu-button color="success" v-if="item === 'music:edit'">编辑歌曲</mu-button>
-      <mu-button color="error" v-if="item === 'music:delete'">删除歌曲</mu-button>
+    <span v-for="(item, index) in menus" :key="index" class="gutter">
+      <mu-button :color="item.icon">{{ item.title }}</mu-button>
     </span>
-    <v-card>
+    <v-card style="margin-top: 20px" width="1000">
       <v-card-title>
-        Nutrition
+        Music
         <v-spacer></v-spacer>
         <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
       </v-card-title>
-      <v-data-table :headers="headers" :items="desserts" :search="search"></v-data-table>
-    </v-card> -->
+      <v-simple-table fixed-header height="400">
+        <template v-slot:default>
+          <thead>
+            <tr>
+              <th class="text-left" v-for="(item, index) in headers" :key="index">{{ item }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in desserts" :key="item.name">
+              <td><v-checkbox></v-checkbox></td>
+              <td>
+                <div class="img"><img :src="item.thumbnail" alt="" /></div>
+              </td>
+              <td>{{ item.songName }}</td>
+              <td>{{ item.singer }}</td>
+              <td>{{ item.commentCount }}</td>
+              <td>{{ item.likeCount }}</td>
+              <td>{{ item.playCount }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
+    </v-card>
   </div>
 </template>
 
@@ -22,17 +40,34 @@ export default {
   name: 'Music',
   data() {
     return {
-      permissions: [],
+      menus: [],
       search: '',
-      headers: []
+      headers: ['', 'Thumbnail', 'SongName', 'Singer', 'Comment_count', 'Like_count', 'Play_count'],
+      desserts: JSON.parse(localStorage.getItem('songList'))
     }
   },
   created() {
-    // this.permissions = this.$store.state.menuList[1].subMenus[1].permissions
-    console.log(this.permissions)
-  }
+    let index = this.$route.query.index
+    let index1 = this.$route.query.index1
+    console.log(index, index1)
+    this.menus = JSON.parse(localStorage.getItem('menuList'))[index].subMenus[index1].subMenus
+  },
+  methods: {},
+  mounted() {}
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
 
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+}
+</style>

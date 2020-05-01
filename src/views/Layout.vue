@@ -1,25 +1,49 @@
 <template>
   <div>
     <v-card class="overflow-hidden">
-      <v-app-bar
-        fixed=""
-        color="#fcb69f"
-        dark
-        shrink-on-scroll
-        src="https://picsum.photos/1920/1080?random"
-        scroll-target="#scrolling-techniques-2"
-      >
+      <v-app-bar fixed="" color="#fcb69f" dark shrink-on-scroll :src="bg" scroll-target="#scrolling-techniques-2">
         <template v-slot:img="{ props }">
           <v-img v-bind="props" gradient="to top right, rgba(19,84,122,.5), rgba(128,208,199,.8)"></v-img>
         </template>
         <v-app-bar-nav-icon></v-app-bar-nav-icon>
-        <v-toolbar-title>云音乐后台</v-toolbar-title>
+        <v-toolbar-title link>云音乐后台</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon>
-          <v-icon>mdi-magnify</v-icon>
+          <v-row justify="center">
+            <v-dialog v-model="dialog" persistent max-width="600px">
+              <template v-slot:activator="{ on }">
+                <v-btn color="primary" dark v-on="on">
+                  <v-icon>mdi-heart</v-icon>
+                </v-btn>
+              </template>
+              <v-card>
+                <v-card-title>
+                  <span class="headline">Change Password</span>
+                </v-card-title>
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12">
+                        <v-text-field label="Password*" type="password" required></v-text-field>
+                      </v-col>
+                      <v-col cols="12">
+                        <v-text-field label="Reconfirm*" type="password" required v-model="pass"></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                  <small>*updatePassword</small>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text @click="dialog = false">Close</v-btn>
+                  <v-btn color="blue darken-1" text @click="updatePassword()">Save</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-row>
         </v-btn>
         <v-btn icon>
-          <v-icon>mdi-heart</v-icon>
+          <v-icon>mdi-magnify</v-icon>
         </v-btn>
         <v-btn icon @click="logout()">
           <v-icon>mdi-dots-vertical</v-icon>
@@ -33,7 +57,7 @@
       <v-row>
         <v-col cols="3">
           <v-container>
-            <v-card min-height="500" class="overflow-hidden">
+            <v-card min-height="550" class="overflow-hidden">
               <v-navigation-drawer
                 v-model="drawer"
                 :color="color"
@@ -45,58 +69,65 @@
               >
                 <v-list dense nav class="py-0">
                   <v-list-item two-line :class="miniVariant && 'px-0'">
-                    <v-list-item-avatar>
-                      <img @click="miniVariant = !miniVariant" :src="user.avatar" style="cursor: pointer" />
+                    <v-list-item-avatar class="avatar">
+                      <img :src="admin.avatar" />
+                      <div class="file-box">
+                        <input
+                          type="file"
+                          title="更改头像"
+                          id="file"
+                          @change="changeAvatar()"
+                          accept=".jpg,.gif,.png,.bmp"
+                          ref="InputFile"
+                          name="files"
+                        />
+                      </div>
                     </v-list-item-avatar>
-
                     <v-list-item-content>
-                      <v-list-item-title><h3 class="gutter">Cloud Music</h3> </v-list-item-title>
-                      <v-list-item-subtitle class="gutter">{{ roleName }}</v-list-item-subtitle>
+                      <v-list-item-title><h3 class="gutter link">Cloud Music</h3> </v-list-item-title>
+                      <v-list-item-subtitle class="gutter link">{{ roleName }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
 
                   <v-divider></v-divider>
-
-                  <v-list-item v-for="item in items" :key="item.title" link>
-                    <template v-if="item.subMenus === null">
-                      <v-list-item-icon>
-                        <v-icon>{{ item.icon }}</v-icon>
-                      </v-list-item-icon>
-
-                      <v-list-item-content v-if="item.path !== null">
-                        <router-link :to="item.path">
-                          <v-list-item-title class="gutter">{{ item.title }}</v-list-item-title>
-                        </router-link>
-                      </v-list-item-content>
-                    </template>
-                    <template v-else>
-                      <v-list-group value="true" style="margin-left:-10px;">
-                        <template v-slot:activator>
-                          <v-list-item-icon>
-                            <v-icon>{{ item.icon }}</v-icon>
-                          </v-list-item-icon>
-                          <v-list-item-title>{{ item.title }}</v-list-item-title>
-                        </template>
-                        <v-list-item-content style="margin-left:20px; ">
-                          <v-list-item v-for="(menu, i) in item.subMenus" :key="i" link>
-                            <v-list-item-icon class="gutter">
-                              <v-icon :v-text="menu.icon">{{ menu.icon }}</v-icon>
-                            </v-list-item-icon>
-                            <router-link :to="menu.path">
-                              <v-list-item-title :v-text="menu.title" class="gutter">{{ menu.title }}</v-list-item-title>
-                            </router-link>
-                          </v-list-item>
+                  <v-list>
+                    <v-list-group v-for="(item, index) in items" :key="index">
+                      <template v-slot:activator v-if="item.type == 1">
+                        <v-list-item-icon>
+                          <v-icon>{{ item.icon }}</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content v-if="item.subMenus.length > 0">
+                          <v-list-item-title class="link">{{ item.title }}</v-list-item-title>
                         </v-list-item-content>
-                      </v-list-group>
-                    </template>
-                  </v-list-item>
+                        <v-list-item-content v-else>
+                          <router-link :to="item.path">
+                            <v-list-item-title class="link">{{ item.title }}</v-list-item-title>
+                          </router-link>
+                        </v-list-item-content>
+                      </template>
+
+                      <v-list-item
+                        v-for="(subItem, index1) in item.subMenus"
+                        :key="index1"
+                        style="cursor: pointer"
+                        @click="gotoSubPage(subItem.path, index, index1)"
+                      >
+                        <v-list-item-icon style="margin-left:20px;">
+                          <v-icon>{{ subItem.icon }}</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                          <v-list-item-title class="link">{{ subItem.title }}</v-list-item-title>
+                        </v-list-item-content>
+                      </v-list-item>
+                    </v-list-group>
+                  </v-list>
                 </v-list>
               </v-navigation-drawer>
             </v-card>
           </v-container>
         </v-col>
         <v-col cols="9">
-          <router-view />
+          <router-view class="area" />
         </v-col>
       </v-row>
     </v-container>
@@ -108,7 +139,7 @@ export default {
   name: 'Layout',
   data() {
     return {
-      user: JSON.parse(localStorage.getItem('user')),
+      admin: JSON.parse(localStorage.getItem('admin')),
       drawer: true,
       items: JSON.parse(localStorage.getItem('menuList')),
       roleName: localStorage.getItem('roleName'),
@@ -117,7 +148,10 @@ export default {
       right: true,
       miniVariant: false,
       expandOnHover: false,
-      background: true
+      background: true,
+      dialog: false,
+      pass: '',
+      loginDto: {}
     }
   },
   components: {},
@@ -127,8 +161,50 @@ export default {
     logout() {
       alert('logout')
       localStorage.clear()
-      this.$store.commit('setUser', null)
+      this.$store.commit('setAdmin', null)
       this.$router.push('/login')
+    },
+    gotoSubPage(path, index, index1) {
+      console.log(path, index, index1)
+      this.$router.push({
+        path: path,
+        query: {
+          index: index,
+          index1: index1
+        }
+      })
+    },
+    updatePassword() {
+      this.loginDto.name = JSON.parse(localStorage.getItem('admin')).name
+      this.loginDto.password = this.pass
+      this.axios({
+        method: 'put',
+        url: this.GLOBAL.baseUrl + '/sysAdmin/password',
+        data: JSON.stringify(this.loginDto),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then((res) => {
+        alert(res.data.data)
+        localStorage.clear()
+        this.$router.push('/login')
+      })
+    },
+    // 更改头像的方法
+    changeAvatar() {
+      var reader = new FileReader()
+      let fileData = this.$refs.InputFile.files[0]
+      console.log(fileData)
+      reader.readAsDataURL(fileData)
+      // 使用formapi打包
+      let formData = new FormData()
+      formData.append('file', fileData)
+
+      // this.axios({
+      //   method: 'post',
+      //   url: this.GLOBAL.baseUrl + '/img',
+      //   data: formData
+      // }).then((res) => {})
     }
   },
   computed: {
@@ -142,9 +218,30 @@ export default {
 <style scoped lang="scss">
 .box {
   margin-top: 90px;
+  
   a {
     color: #fff;
     text-decoration: none;
+  }
+}
+.area {
+  margin-top: 13px;
+}
+
+.avatar {
+  position: relative;
+
+  .file-box {
+    position: absolute;
+
+    #file {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      opacity: 0;
+    }
   }
 }
 </style>

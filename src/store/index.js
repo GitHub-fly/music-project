@@ -4,7 +4,7 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
     token: localStorage.getItem('token'),
-    user: JSON.parse(localStorage.getItem('user')),
+    admin: JSON.parse(localStorage.getItem('admin')),
     menuList: [],
     roleName: ''
   },
@@ -12,8 +12,8 @@ const store = new Vuex.Store({
     setToken(state, data) {
       state.token = data
     },
-    setUser(state, data) {
-      state.user = data
+    setAdmin(state, data) {
+      state.admin = data
     },
     setMenuList(state, menuList) {
       state.menuList = menuList

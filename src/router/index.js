@@ -33,12 +33,12 @@ const routes = [
         component: () => import('../views/Permission.vue')
       },
       {
-        path: '/type',
+        path: '/music-type',
         name: 'Type',
-        component: () => import('../views/Type.vue')
+        component: () => import('../views/MusicType.vue')
       },
       {
-        path: '/list',
+        path: '/music-list',
         name: 'MusicList',
         component: () => import('../views/MusicList.vue')
       },

@@ -45,7 +45,7 @@
                   Close
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" text @click="entryIndex()">
+                <v-btn color="primary" text @click="getUserMuse()">
                   entry
                 </v-btn>
               </v-card-actions>
@@ -54,6 +54,7 @@
         </v-row>
       </div>
     </mu-container>
+    <button @click="toGit()">GitHub</button>
   </div>
 </template>
 
@@ -64,7 +65,9 @@ export default {
     return {
       dialogWindow: false,
       select: [],
+      roleId: 0,
       roleName: '',
+      roleList: '',
       result: {},
       token: '',
       usernameRules: [{ validate: (val) => !!val, message: '必须填写用户名' }],
@@ -75,8 +78,8 @@ export default {
       argeeRules: [{ validate: (val) => !!val, message: '必须同意用户协议' }],
       verifyCodeRules: [{ validate: (val) => !!val, message: '必须填写验证码' }],
       loginDto: {
-        name: '',
-        password: '',
+        name: 'soft1851',
+        password: '123456a',
         verifyCode: '',
         uuid: '',
         isAgree: false
@@ -93,21 +96,6 @@ export default {
     this.src = this.changeImg()
   },
   methods: {
-    /**
-     * 通过选择角色后进入主页的方法
-     */
-    entryIndex() {
-      if (this.roleName == 'admin') {
-        this.token = this.result.data.data[1]
-      } else {
-        this.token = this.result.data.data[2]
-      }
-      localStorage.setItem('user', JSON.stringify(this.result.data.data[3]))
-      localStorage.setItem('token', this.token)
-      this.$store.commit('setToken', this.token)
-      this.$store.commit('setUser', this.result.data.data[3])
-      this.getUserMuse()
-    },
     changeImg() {
       return (this.src = this.GLOBAL.baseUrl + '/captcha?uuid=' + this.uuid())
     },
@@ -138,21 +126,28 @@ export default {
             'Content-Type': 'application/json'
           }
         }).then((res) => {
-          console.log(res.data)
           let code = res.data.code
           if (code == 1) {
             this.$store.commit('setRoleName', this.roleName)
-            let roleList = res.data.data[0]
-            if (roleList.length > 1) {
+            // 获取角色列表
+            this.roleList = res.data.data.admin.roles
+            // 获取角色 token
+            this.token = res.data.data.token
+            localStorage.setItem('token', this.token)
+            this.$store.commit('setToken', this.token)
+            // 获取当前用户的基本信息
+            localStorage.setItem('admin', JSON.stringify(res.data.data.admin))
+            this.$store.commit('setAdmin', res.data.data.admin)
+
+            if (this.roleList.length > 1) {
               this.dialogWindow = true
-              this.select = res.data.data[0]
+              for (let i = 0; i < this.roleList.length; i++) {
+                const element = this.roleList[i]
+                this.select.splice(i, 0, element.roleName)
+              }
               this.result = res
             } else {
-              this.token = res.data.data[1]
-              localStorage.setItem('token', this.token)
-              localStorage.setItem('user', JSON.stringify(res.data.data[2]))
-              this.$store.commit('setUser', res.data.data[2])
-              this.$store.commit('setToken', this.token)
+              this.roleName = this.roleList[0].roleName
               this.getUserMuse()
             }
           } else {
@@ -166,18 +161,50 @@ export default {
      * 通过 token 获取当前用户所拥有的的菜单权限
      */
     getUserMuse() {
+      localStorage.setItem('roleName', this.roleName)
+      for (let i = 0; i < this.roleList.length; i++) {
+        const element = this.roleList[i]
+        if (this.roleName == element.roleName) {
+          this.roleId = element.roleId
+          localStorage.setItem('roleId', this.roleId)
+          break
+        }
+      }
+      console.log('角色id:' + this.roleId)
+
       this.axios({
         methods: 'get',
-        url: this.GLOBAL.baseUrl + '/sysRole/' + this.token
+        url: this.GLOBAL.baseUrl + '/sysRole',
+        params: {
+          roleId: this.roleId
+        }
       }).then((res) => {
-        this.roleName = res.data.data.roleName
-        localStorage.setItem('roleName', this.roleName)
         this.menuList = res.data.data.menus
         localStorage.setItem('menuList', JSON.stringify(this.menuList))
         this.$store.commit('setMenuList', this.menuList)
+        this.getMusicInfo()
         this.$router.push('/')
       })
     },
+    /**
+     * 获取音乐列表的数据
+     */
+    getMusicInfo() {
+      this.axios({
+        methods: 'get',
+        url: this.GLOBAL.baseUrl + '/song/limit',
+        params: {
+          roleId: localStorage.getItem('roleId')
+        }
+      }).then((res) => {
+        console.log(res)
+
+        localStorage.setItem('songList', JSON.stringify(res.data.data))
+      })
+    },
+    /**
+     * 清除表单数据
+     */
     clear() {
       this.$refs.form.clear()
       this.loginDto = {
@@ -186,6 +213,12 @@ export default {
         verifyCode: '',
         isAgree: false
       }
+    },
+    toGit() {
+      const authorize_uri = 'https://github.com/login/oauth/authorize'
+      const client_id = '0484ede0f81b37d56093'
+      const redirect_uri = 'http://localhost:8080/login/oauth2/code/github'
+      window.location.href = `${authorize_uri}?client_id=${client_id}&redirect_uri=${redirect_uri}`
     }
   },
   computed: {}
