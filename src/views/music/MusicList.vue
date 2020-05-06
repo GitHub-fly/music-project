@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import SongListTable from '../components/SongListTable'
+import SongListTable from '../../components/SongListTable'
 export default {
   name: 'MusicList',
   components: {

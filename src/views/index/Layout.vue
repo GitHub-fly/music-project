@@ -218,7 +218,7 @@ export default {
 <style scoped lang="scss">
 .box {
   margin-top: 90px;
-  
+
   a {
     color: #fff;
     text-decoration: none;

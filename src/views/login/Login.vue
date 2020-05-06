@@ -23,6 +23,7 @@
         <mu-form-item>
           <mu-button color="primary" @click="submit">提交</mu-button>
           <mu-button @click="clear">重置</mu-button>
+          <mu-button @click="toGit()">GitHub登录</mu-button>
         </mu-form-item>
       </mu-form>
       <mu-dialog title="Dialog" width="360" :open.sync="openSimple">
@@ -54,7 +55,6 @@
         </v-row>
       </div>
     </mu-container>
-    <button @click="toGit()">GitHub</button>
   </div>
 </template>
 
@@ -247,7 +247,7 @@ export default {
 }
 
 .bg {
-  background-image: url('../assets/images/login-bg.jpg');
+  background-image: url('../../assets/images/login-bg.jpg');
   opacity: 0.8;
   height: 125vh;
   background-size: calc(100%);
