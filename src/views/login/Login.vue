@@ -22,7 +22,7 @@
 
         <mu-form-item>
           <mu-button color="primary" @click="submit">提交</mu-button>
-          <mu-button @click="clear">重置</mu-button>
+          <mu-button color="" @click="clear">重置</mu-button>
           <mu-button @click="toGit()">GitHub登录</mu-button>
         </mu-form-item>
       </mu-form>
@@ -97,7 +97,7 @@ export default {
   },
   methods: {
     changeImg() {
-      return (this.src = this.GLOBAL.baseUrl + '/captcha?uuid=' + this.uuid())
+      return (this.src = 'http://localhost:8080/api/captcha?uuid=' + this.uuid())
     },
     uuid() {
       let s = []
@@ -120,12 +120,14 @@ export default {
         console.log('form valid: ', result)
         this.axios({
           method: 'post',
-          url: this.GLOBAL.baseUrl + '/sysAdmin/login',
+          url: '/sysAdmin/login',
           data: JSON.stringify(this.loginDto),
           headers: {
             'Content-Type': 'application/json'
           }
         }).then((res) => {
+          console.log(res)
+
           let code = res.data.code
           if (code == 1) {
             this.$store.commit('setRoleName', this.roleName)
@@ -138,6 +140,8 @@ export default {
             // 获取当前用户的基本信息
             localStorage.setItem('admin', JSON.stringify(res.data.data.admin))
             this.$store.commit('setAdmin', res.data.data.admin)
+
+            localStorage.setItem('id', res.data.data.admin.id)
 
             if (this.roleList.length > 1) {
               this.dialogWindow = true
@@ -174,7 +178,7 @@ export default {
 
       this.axios({
         methods: 'get',
-        url: this.GLOBAL.baseUrl + '/sysRole',
+        url: '/sysRole',
         params: {
           roleId: this.roleId
         }
@@ -192,7 +196,7 @@ export default {
     getMusicInfo() {
       this.axios({
         methods: 'get',
-        url: this.GLOBAL.baseUrl + '/song/limit',
+        url: '/song/limit',
         params: {
           roleId: localStorage.getItem('roleId')
         }
@@ -217,7 +221,7 @@ export default {
     toGit() {
       const authorize_uri = 'https://github.com/login/oauth/authorize'
       const client_id = '0484ede0f81b37d56093'
-      const redirect_uri = 'http://localhost:8080/login/oauth2/code/github'
+      const redirect_uri = 'http://localhost:8080/oauth2/code/github'
       window.location.href = `${authorize_uri}?client_id=${client_id}&redirect_uri=${redirect_uri}`
     }
   },

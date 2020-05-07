@@ -72,7 +72,7 @@ export default {
     getMusicListInfo() {
       this.axios({
         methods: 'GET',
-        url: this.GLOBAL.baseUrl + '/songList/all',
+        url: '/songList/all',
         params: {
           roleId: localStorage.getItem('roleId')
         }

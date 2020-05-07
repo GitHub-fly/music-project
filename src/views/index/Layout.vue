@@ -9,45 +9,29 @@
         <v-toolbar-title link>云音乐后台</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon>
-          <v-row justify="center">
-            <v-dialog v-model="dialog" persistent max-width="600px">
-              <template v-slot:activator="{ on }">
-                <v-btn color="primary" dark v-on="on">
-                  <v-icon>mdi-heart</v-icon>
-                </v-btn>
-              </template>
-              <v-card>
-                <v-card-title>
-                  <span class="headline">Change Password</span>
-                </v-card-title>
-                <v-card-text>
-                  <v-container>
-                    <v-row>
-                      <v-col cols="12">
-                        <v-text-field label="Password*" type="password" required></v-text-field>
-                      </v-col>
-                      <v-col cols="12">
-                        <v-text-field label="Reconfirm*" type="password" required v-model="pass"></v-text-field>
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                  <small>*updatePassword</small>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="dialog = false">Close</v-btn>
-                  <v-btn color="blue darken-1" text @click="updatePassword()">Save</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </v-row>
+          <v-icon>mdi-heart</v-icon>
         </v-btn>
         <v-btn icon>
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
-        <v-btn icon @click="logout()">
-          <v-icon>mdi-dots-vertical</v-icon>
-        </v-btn>
+        <v-menu left bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn icon v-on="on">
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="dialog = true">
+              <v-list-item-title>更改密码</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>系统设置</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="logout()">
+              <v-list-item-title>退出系统</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-app-bar>
       <v-sheet id="scrolling-techniques-2" class="overflow-y-auto" max-height="600">
         <v-container style="height: 1px;"></v-container>
@@ -76,7 +60,7 @@
                           type="file"
                           title="更改头像"
                           id="file"
-                          @change="changeAvatar()"
+                          @change="changeAvatar($event)"
                           accept=".jpg,.gif,.png,.bmp"
                           ref="InputFile"
                           name="files"
@@ -131,6 +115,33 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-row justify="center">
+      <v-dialog v-model="dialog" persistent max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Change Password</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field label="Password*" type="password" required></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field label="Reconfirm*" type="password" required v-model="pass"></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+            <small>*updatePassword</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="dialog = false">Close</v-btn>
+            <v-btn color="blue darken-1" text @click="updatePassword()">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </div>
 </template>
 
@@ -179,10 +190,13 @@ export default {
       this.loginDto.password = this.pass
       this.axios({
         method: 'put',
-        url: this.GLOBAL.baseUrl + '/sysAdmin/password',
+        url: '/sysAdmin/password',
         data: JSON.stringify(this.loginDto),
         headers: {
           'Content-Type': 'application/json'
+        },
+        params: {
+          roleId: localStorage.getItem('roleId')
         }
       }).then((res) => {
         alert(res.data.data)
@@ -192,19 +206,26 @@ export default {
     },
     // 更改头像的方法
     changeAvatar() {
-      var reader = new FileReader()
-      let fileData = this.$refs.InputFile.files[0]
-      console.log(fileData)
-      reader.readAsDataURL(fileData)
-      // 使用formapi打包
       let formData = new FormData()
-      formData.append('file', fileData)
-
-      // this.axios({
-      //   method: 'post',
-      //   url: this.GLOBAL.baseUrl + '/img',
-      //   data: formData
-      // }).then((res) => {})
+      formData.append('id', localStorage.getItem('id'))
+      formData.append('file', event.target.files[0])
+      this.axios({
+        method: 'post',
+        url: '/sysAdmin/upload',
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        params: {
+          roleId: localStorage.getItem('roleId')
+        },
+        data: formData
+      }).then((res) => {
+        console.log(this.admin)
+        console.log(res.data.data)
+        this.admin.avatar = res.data.data
+        console.log(this.admin)
+        localStorage.setItem('admin', JSON.stringify(this.admin))
+      })
     }
   },
   computed: {

@@ -4,6 +4,8 @@ import VueRouter from 'vue-router'
 import goTo from 'vuetify/es5/services/goto'
 import Layout from '../views/index/Layout.vue'
 import Dashboard from '../views/index/Dashboard.vue'
+import Git from '../views/other/Git.vue'
+import Repositry from '../views/other/Repositry.vue'
 
 Vue.use(VueRouter)
 
@@ -62,11 +64,6 @@ const routes = [
     ]
   },
   {
-    path: '/auth',
-    name: 'Auth',
-    component: () => import('../views/other/Auth.vue')
-  },
-  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/login/Login.vue')
@@ -80,6 +77,39 @@ const routes = [
     path: '/dark',
     name: 'Dark',
     component: () => import('../views/layout/Dark.vue')
+  },
+  {
+    path: '/git',
+    name: 'Git',
+    component: Git,
+    redirect: '/git/repositry',
+    children: [
+      {
+        path: '/git/auth',
+        name: 'Auth',
+        component: () => import('../views/other/Auth.vue')
+      },
+      {
+        path: '/git/repositry',
+        name: 'Repositry',
+        component: Repositry
+      },
+      {
+        path: '/git/following',
+        name: 'Following',
+        component: () => import('../views/other/Following.vue')
+      },
+      {
+        path: '/git/followers',
+        name: 'Followers',
+        component: () => import('../views/other/Followers.vue')
+      }
+    ]
+  },
+  {
+    path: '/todoList',
+    name: 'TodoList',
+    component: () => import('../views/practice/TodoList.vue')
   }
 ]
 

@@ -1,7 +1,7 @@
 <template>
   <div style="padding-top:10px;">
     <span v-for="(item, index) in menus" :key="index" class="gutter">
-      <mu-button :color="item.icon">{{ item.title }}</mu-button>
+      <mu-button :color="item.icon" @click="handleClick(item.title)">{{ item.title }}</mu-button>
     </span>
     <v-card style="margin-top: 20px" width="1000">
       <v-card-title>
@@ -52,7 +52,43 @@ export default {
     console.log(index, index1)
     this.menus = JSON.parse(localStorage.getItem('menuList'))[index].subMenus[index1].subMenus
   },
-  methods: {},
+  methods: {
+    handleClick(title) {
+      if (title === '新增') {
+        this.add()
+      }
+      if (title === '搜索') {
+        this.select()
+      }
+      if (title === '导入') {
+        this.import()
+      }
+      if (title === '导出') {
+        this.export()
+      }
+    },
+    add() {
+      alert('新增歌曲')
+    },
+    select() {
+      alert('搜索歌曲')
+    },
+    export() {
+      this.axios({
+        method: 'get',
+        url: '/song/export',
+        params: {
+          roleId: localStorage.getItem('roleId')
+        }
+      }).then((res) => {
+        alert('导出歌曲')
+        console.log(res)
+      })
+    },
+    import() {
+      alert('导入歌曲')
+    }
+  },
   mounted() {}
 }
 </script>
